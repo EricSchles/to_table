@@ -29,8 +29,29 @@ class HTMLNode:
 
 class Parser:
     def __init__(self,document=''):
-        self.document = document
+        if "<!" in document:
+            document = document.replace("<!doctype html","")  
+        self.document = document.replace("\r","\n").replace("\n","")
         self.obj = self.transform(self.document)
+
+    def traverse_exists(self,cur):
+        pass
+        
+    def tag_exists(self,tag):
+        pass
+        # head = self.obj
+        # cur = head
+        # found = False
+        # while not found:
+        #     if cur.tag == tag:
+        #         found = True
+        #     else:
+        #         for child in cur.children:
+        #             if child.tag == tag:
+        #                 found = True
+        #             else:
+        #                 while child:
+                            
 
 
     #process html methods
@@ -80,6 +101,8 @@ class Parser:
             return head
         else:
             return self._transform(document,current,head,count+1)
+    
+
     #iterative (dynamic programming) - possibly misses some cases, more testing required here
     def dp_transform(self,document,head,offset=0,open_tag='',close_tag=''):
         count = 0
@@ -87,6 +110,7 @@ class Parser:
         while offset != -1 or document != '' or open_tag!='' or close_tag!="":
             #print offset
             open_tag,close_tag,offset = self.find_tags(document)
+            print document
             if open_tag == '':
                 break
             current = HTMLNode(open_tag,data=self.find_data(document),children=[],parent=previous)
