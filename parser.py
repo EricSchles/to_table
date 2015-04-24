@@ -5,14 +5,20 @@
 
 # http://www.openbookproject.net/thinkcs/python/english2e/index.html 
 
+#this is more or less a B-tree
 class HTMLNode:
-    def __init__(self,tag,data='',children=[]):
+    def __init__(self,tag,data='',children=[],parent=None):
         self.tag = tag
         self.data = data
         self.children = children
+        self.parent = parent
 
     def set_children(self,children):
         self.children = children
+
+    #reference to the parent node (there can be only one of these)
+    def set_parent(self,parent):
+        self.parent = parent
 
     def append_child(self,child):
         self.children.append(child)
@@ -34,7 +40,7 @@ class Parser:
             open_tag,close_tag,offset = self.find_tags(document)
             head = HTMLNode(open_tag,data=self.find_data(document),children=[])
             document = self.strip_doc(document,open_tag,close_tag)
-            return self._transform(document,head)
+            return self._transform(document,head,head)
 
     def find_tags(self,document):
         offset = document.find(">")
@@ -49,12 +55,17 @@ class Parser:
     def strip_doc(self,document,open_tag,close_tag):
         return "<"+document.lstrip(open_tag).rstrip(close_tag)+">"
         
-    def _transform(self,document,head):
-        offset = document.find(">")
+    def _transform(self,document,previous,head):
+        open_tag,close_tag,offset = self.find_tags(document)
+        current = HTMLNode(open_tag,data=self.find_data(document),children=[],parent=previous)
+        #sets reference so that child and parent nodes are linked
+        previous.append_child(current)
+        document = self.strip_doc(document,open_tag,close_tag)
         if offset == -1:
-            return 
-        return head
-
+            return head
+        else:
+            return self._transform(document,current,head)
+        
 
 
     def __str__(self):
